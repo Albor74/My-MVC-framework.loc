@@ -1,13 +1,12 @@
 <?php
+if (PHP_MAJOR_VERSION < 8.0){
+    die("Require PHP version  >= 8");
+}
 
-echo "<pre>";
-print_r($_SERVER['REQUEST_URI']);
-echo "</pre>";
+require_once __DIR__ . '/../config/init.php';// подключаем файл с константами
 
-echo "<pre>";
-print_r($_SERVER['QUERY_STRING']);
-echo "</pre>";
 
-echo "<pre>";
-print_r($_GET);
-echo "</pre>";
+require_once ROOT . '/vendor/autoload.php';
+
+
+//new \PHPFramework\Test();
