@@ -50,8 +50,108 @@
 
       Теперь в index.php доступны классы с пространствами имен указанными в composer.json
       Если надо поменять что-то в  composer.json, надо  перегенерировать файл автозагрузки командой
-      composer dump-autoload
+      composer dump-autoload.
+
+===  Установим пакет var-dumper   от Simfony ====
+
+    1. packagist.org
+    2. simfony/var-dumper
+   В составе пакета две функции dump() и dd()
+   Эта зависимость отразилась в composer.json
+   "require": {
+       "symfony/var-dumper": "^7.2"
+     }
+
+===  Ключевые классы ядра фреймворка ====
+
+    1. класс Application - в нём будут инициализироваться ряд объектов:
+        - маршрутизатор класс Router
+        - класс Response - описывает работу с ответом
+        - класс Request - описывает обработку запроса
+        - класс Router - описывает маршруты
+
+   2. class Application
+     {
+           public string $uri; // храним получаемый url запрос
+
+           public Request $request; свойства с записанным в него экземпляром класса
+           public Response $response;
+           public Router $router;
+
+           public function __construct()
+           {
+              $this->uri = $_SERVER['QUERY_STRING']; // получаем url запрос (чистый, исходный запрос)
+              $this->request = new Request($this->uri); //подключаем классы ядра
+              $this->response = new Response();//подключаем классы ядра
+              $this->router = new Router($this->request, $this->response);
+           }
+     }
+   3. class Request
+      {
+          public string $uri;
+          public function __construct($uri) // этот $uri будет приходить из class Application
+                                               (в нём мы уже взяли его из глобального массива $_SERVER)
+          {
+              $this->uri = trim(urldecode($uri), '/'); // обработанный запрос
+          }
+      }
+   urldecode() - декадирует uri
+
+   4. класс Response
+
+   5. класс Router
+   class Router
+   {
+
+       public Request $request; //прокидываем сюда свойства
+       public Response $response; //прокидываем сюда свойства
+
+       protected array $routes = []; создаем пустой массив с маршрутами
+
+       public function __construct(Request $request, Response $response)
+       {
+           $this->request = $request;
+           $this->response = $response;
+       }
+
+       public function getRoutes(): array // пользовательская функция для просмотра таблицы маршрутов
+       {
+           return $this->routes;
+       }
+
+       два метода get и post можно также сделать  и put, delete,patch
+
+       public function get($path, $callback): void  // описание метода GET запроса
+       {
+           $this->routes['GET']['$path'] = $callback; // запись маршрута в массив
+       }
+
+       public function post($path, $callback): void  описание метода POST запроса
+       {
+           $this->routes['POST']['$path'] = $callback; //запись маршрута в массив
+       }
 
 
+   }
+   6. Создаем файл с возможными маршрутами config/routes.php
+
+
+     /** @var \PHPFramework\Application $app */
+
+     $app->router->get('/' , function (){
+         return 'Home page';
+     });
+
+     $app->router->get('/about' , function (){
+         return 'About page';
+     });
+
+     $app->router->get('/contact' , function (){
+         return 'Contact form page';
+     });
+
+     $app->router->post('/contact' , function (){
+         return 'Contact form POST page';
+     });
 
 
