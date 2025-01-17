@@ -1,0 +1,57 @@
+
+Первые шаги :
+ -- Создал репозиторий на githube
+ -  клонировал в папку Open Server/Home через ide
+ -  создал файл конфигурации для Open Sever .osp
+ -  первый commit и push
+ -  создал новую ветку trainy.
+
+ Cоздаём точку входа
+ - index.php
+  - описываем точку входа файл .htaccess в корне:
+          #REwrite модуль вэбсервера Апачи включаем
+          RewriteEngine On
+          #Пишем правило (.*) - любой запрос приходящий отправляется в папку public и сохраняется в переменную $1
+          RewriteRule (.*) public/$1
+      - в папке public создаем свой .htaccess:
+          #REwrite модуль вэбсервера Апачи включаем
+          RewriteEngine On
+          RewriteCond %{REQUEST_FILENAME} !-f
+          # если текущий запрос идет на несуществующий файл - пишем правило (.*) -
+          # любой запрос приходящий  в папку public отправляется на index.php,в виде get запроса ? с переменнной $1.
+          Если файл существует в папке public(например файл стилей main.css),тогда перенаправление на index не делай.
+          RewriteRule (.*) index.php?$1 [L,QSA]
+          [L,QSA] флаг ,где L - last последнее правило и QSA - query string append  строка запроса добавить в конец
+
+===   АВТОЗАГРУЗКА КЛАССОВ PSR-4   ====
+
+  1.Объявление констант в файле config/init.php:
+   - define("ROOT",dirname(__DIR__)); где  ROOT -имя константы,мы придумали .
+       __DIR__ - Каталог файла. PHP возвращает каталог подключённого файла(config)
+        dirname() — Возвращает путь к родительскому каталогу (my-mvc-framework.loc)
+
+   const WWW = ROOT . '/public';
+   const APP = ROOT . '/app';
+   const CORE = ROOT . '/core';
+   const HELPERS = ROOT . '/helpers';
+   const CONFIG = ROOT . '/config';
+
+   2.Сначала подключаем init.php к index.php - точке входа, чтобы заработали константы путей
+    require_once __DIR__ . '/../config/init.php';
+   3. Создаём в корне composer.json
+    "autoload": {
+        "psr-4": {     стандарт автозагрузки
+          "PHPFramework\\": "core/",    - PHPFramework- придумали пространство имен для ядра
+          "App\\" : "app/"      - пространство имен для приложения
+        }
+      },
+      Теперь в консоле команда  - composer install -> появился composer.loc
+      и папка Vendor и  ней autoload.php , который подключаем к входу index.php
+
+      Теперь в index.php доступны классы с пространствами имен указанными в composer.json
+      Если надо поменять что-то в  composer.json, надо  перегенерировать файл автозагрузки командой
+      composer dump-autoload
+
+
+
+
